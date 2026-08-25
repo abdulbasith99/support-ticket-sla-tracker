@@ -376,6 +376,58 @@ This project focuses on more than basic CRUD operations. It demonstrates:
 
 ---
 
+## Architecture & Tradeoffs
+
+The application is split into a React frontend and a GraphQL backend.
+
+- The frontend is responsible for presentation, navigation, authentication state, and displaying SLA information returned by the backend.
+- The backend owns authorization, ticket lifecycle rules, SLA calculations, persistence, and GraphQL operations.
+- PostgreSQL stores users, tickets, comments, holidays, assignments, and SLA-related timestamps.
+- Prisma is used for schema management, migrations, and database access.
+
+### SLA Design
+
+SLA deadlines are calculated in the backend using business hours rather than normal elapsed time.
+
+The engine handles:
+
+- Monday to Friday business windows
+- Before-hours and after-hours ticket creation
+- Weekend exclusion
+- Configured public holidays
+- Multi-day SLA windows
+- First-response and resolution clocks
+- `ON_TRACK`, `AT_RISK`, and `BREACHED` states
+
+The frontend never calculates SLA status itself.
+
+### Authorization Design
+
+Authorization is enforced server-side.
+
+- Reporters can access only their own tickets.
+- Reporters can comment only on their own tickets.
+- Agents can access the full support queue.
+- Agent-only operations include assignment, status changes, and resolution.
+- Public registration creates Reporter accounts only.
+
+### Tradeoffs
+
+For this assignment, ticket filtering by SLA state and dashboard SLA counts are calculated in application logic after loading relevant ticket data. For a much larger production system, this would be moved closer to the database or precomputed for better scalability.
+
+The current implementation uses one seeded Agent account for demonstration. A production system would typically include admin-managed agent provisioning and broader organization/team permissions.
+
+### Future Improvements
+
+- Organization and team-based permissions
+- Admin management for Agent accounts
+- Email or notification integrations
+- SLA escalation workflows
+- Audit logs
+- Search improvements
+- Pagination optimized for larger datasets
+- Deployment configuration and CI/CD
+
 ## License
 
 This project was developed as a technical assignment and portfolio project.
